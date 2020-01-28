@@ -12,8 +12,7 @@ fun main(args: Array<String>) {
 
     val url = args[1]
 
-    var name = args[2]
-    if (!name.startsWith(Package.PREFIX)) name = Package.PREFIX + name
+    val name = args[2]
 
     val packages = dir.walk()
             .filter { it.isFile }
@@ -28,11 +27,12 @@ fun main(args: Array<String>) {
 }
 
 fun trace(packages: Set<Package>, depends: MutableSet<Package>, name: String) {
+    println("Searching for $name")
     val pkg = packages.first { it.provide(name) }
     depends.add(pkg)
     pkg.depends.forEach { trace(packages, depends, it) }
 }
 
 /*
-https://github.com/Alexpux/MSYS2-pacman
+https://github.com/Alexpux/MSYS2-pacman/blob/master/test/pacman/pmdb.py
 */

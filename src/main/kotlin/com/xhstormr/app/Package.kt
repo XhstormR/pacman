@@ -9,6 +9,7 @@ class Package(path: File) {
     lateinit var desc: String
     lateinit var filename: String
     lateinit var pkgVersion: PackageVersion
+    var groups = emptyList<String>()
     var depends = emptyList<String>()
     var provides = emptyList<String>()
 
@@ -22,6 +23,7 @@ class Package(path: File) {
                     "%DESC%" -> desc = it.readLine()
                     "%FILENAME%" -> filename = it.readLine()
                     "%VERSION%" -> pkgVersion = PackageVersion(it.readLine())
+                    "%GROUPS%" -> groups = getSection(it)
                     "%DEPENDS%" -> depends = getSection(it)
                     "%PROVIDES%" -> provides = getSection(it)
                 }
@@ -30,15 +32,15 @@ class Package(path: File) {
     }
 
     companion object {
-        const val PREFIX = "mingw-w64-x86_64-"
+        const val MINGW_PREFIX = "mingw-w64-x86_64-"
     }
 
-    fun provide(name: String): Boolean {
-        if (this.name == name) return true
-        if ("${this.name}=${pkgVersion.version}" == name) return true
-        if ("${this.name}=${pkgVersion.pkgVersion}" == name) return true
-        if (provides.contains(name)) return true
-        return false
+    fun provide(name: String) = when {
+        this.name == name -> true
+        this.name == name.substringBefore('=') -> true
+        this.name == name.substringBefore(">=") -> true
+        provides.contains(name) -> true
+        else -> false
     }
 
     private fun getSection(reader: BufferedReader): List<String> {
